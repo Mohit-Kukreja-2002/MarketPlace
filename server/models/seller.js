@@ -21,36 +21,19 @@ const SellerSchema = new Schema({
         type: String,
         minlength: [8, "Password must be atleast 8 characters"],
     },
-    products: [{
-        name: {
-            type: String,
-        },
-        price: {
-            type: String,
-        },
-        category: {
-            type: String
-        },
-        status:{
-            type: String,
-        },
-        soldQuantity: {
-            type: Number
-        },
-        tags: [String],
-    }],
+    products: [String],
     avatar: {
         public_id: String,
         url: String,
     },
-    upi: { 
-        type: String 
+    upi: {
+        type: String
     },
-    phoneNumber:{
+    phoneNumber: {
         type: String,
     }
-    
-},{timestamps:true})
+
+}, { timestamps: true })
 
 SellerSchema.pre('save', async function (next) {
     if (!this.isModified('password')) {

@@ -11,10 +11,14 @@ dotenv.config();
 
 export const registerSeller = async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const { email, password, confirmPassword } = req.body;
 
         if (password.length < 8) {
             return res.status(400).json({ error: "Password must be at least 8 characters" });
+        }
+
+        if(password!==confirmPassword) {
+            return res.status(400).json({ error: "Password mismatch" });
         }
 
         let seller = await Seller.findOne({ email });
