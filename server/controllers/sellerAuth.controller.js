@@ -155,3 +155,52 @@ export const logoutSeller = async (req, res, next) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 }
+
+export const authStatus = async(req,res) =>{
+    // console.log("inside");
+    const access_token = req.cookies.jwt;
+
+    if (!access_token) {
+        return res.status(400).json({
+            verified: false,
+            error: "First login to proceed"
+        });
+    }
+
+    try {
+        const decoded = jwt.verify(access_token, process.env.JWT_SECRET);
+
+        if (!decoded) {
+            return res.status(400).json({
+                verified: false,
+                error: "JWT token is not valid",
+            });
+        }
+
+        // Check if the access token is expired
+        if (decoded.exp && decoded.exp <= Date.now() / 1000) {
+            return res.status(400).json({
+                verified: false,
+                error: "JWT token has expired",
+            });
+        } else {
+            const seller = await Seller.findById(decoded.sellerId);
+
+            if (!seller) {
+                return res.status(400).json({
+                    verified: false,
+                    error: "First login to proceed"
+                });
+            }
+
+            return res.status(200).json({
+                verified: true,
+            });
+        }
+    } catch (error) {
+        return res.status(500).json({
+            verified: false,
+            error: "Internal Server Error"
+        });
+    }
+}

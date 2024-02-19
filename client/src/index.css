@@ -9,7 +9,18 @@
 .bg-custom-svg {
     background-image: url('./assets/loginbg.svg');
 }
+.howItWorks-custom-svg {
+    background-image: url('./assets/sel.svg');
+}
 
 .bg-signUp-proceed {
   background-color: linear-gradient(to right, #26d0ce, #1a2980);
+}
+
+.bgCircle {
+  background: linear-gradient(315deg,#485461 0%,#28313b 74%) !important;
+}
+
+.custom-Outline{
+  outline: 1px solid #cc2643!important;
 }
