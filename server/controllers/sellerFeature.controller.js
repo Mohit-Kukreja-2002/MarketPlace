@@ -7,7 +7,7 @@ export const getSellerInfo = async (req, res) => {
     try {
         const sellerId = req.seller?._id;
 
-        const seller = await Seller.findById(sellerId);
+        const seller = await Seller.findById(sellerId).select('-password');;
 
         res.status(200).json({
             success: true,
@@ -24,21 +24,26 @@ export const getSellerInfo = async (req, res) => {
 export const updateSellerInfo = async (req, res) => {
     try {
         const sellerId = req.seller?._id;
-        const seller = await Seller.findById(sellerId);
+        const { data } = req.body;
+        console.log(data)
+        const updatedSeller = await Seller.findByIdAndUpdate(
+            sellerId,
+            { 
+                $set: data 
+            }, // Update the seller document with the data object
+            { new: true } // Return the modified document rather than the original
+        );
 
-        const { shopName, shopLocation, phoneNumber, upi } = req.body;
-
-        if (shopName) seller.shopName = shopName;
-        if (shopLocation) seller.shopLocation = shopLocation;
-        if (phoneNumber) seller.phoneNumber = phoneNumber;
-        if (upi) seller.upi = upi;
-
-        await seller.save();
+        if(updatedSeller.shopName && updatedSeller.shopOwner && updatedSeller.shopLocation && updatedSeller.upi &&
+            updatedSeller.phoneNumber) {
+                updatedSeller.profileCompleted = true;
+                await updatedSeller.save();
+            }
 
         res.status(200).json({
             success: true,
             message: "Profile updated successfully",
-            seller,
+            seller: updatedSeller,
         });
     } catch (error) {
         console.log("Error in updateSellerInfo: " + error.message);
@@ -50,24 +55,32 @@ export const updateSellerInfo = async (req, res) => {
 
 export const addProduct = async (req, res) => {
     try {
-        const data = req.body;
+        const {data} = req.body;
 
         const sellerId = req.seller?._id;
         const seller = await Seller.findById(sellerId);
 
-        const product = await Products.create(data);
-        if (product) seller.products.push(product._id);
-
-        await seller.save();
-
-        res.status(200).json({
-            success: true,
-            message: "Product added successfully",
-            product,
-        });
+        try {
+            const product = await Products.create(data);
+            if (product) seller.products.push(product._id);
+            await seller.save();
+    
+            res.status(200).json({
+                success: true,
+                message: "Product added successfully",
+                product,
+            });
+        } catch (error) {
+            console.log(error.message);
+            res.status(400).send({
+                success: false,
+                error:error.message
+            });
+        }
     } catch (error) {
         console.log("Error in addProduct: " + error.message);
         return res.status(500).json({
+            success: false,
             error: "Internal Server Error",
         })
     }
@@ -198,9 +211,9 @@ export const getSellerProducts = async (req, res) => {
             }
         );
 
-        return res.status(200).json({ 
+        return res.status(200).json({
             success: true,
-            sellerProducts 
+            sellerProducts
         });
 
     } catch (error) {
@@ -224,8 +237,8 @@ export const getSellerProductsByCategory = async (req, res) => {
         }
 
         // Get all products associated with the seller
-        const sellerProducts = await Products.find({ 
-            _id: { $in: seller.products } 
+        const sellerProducts = await Products.find({
+            _id: { $in: seller.products }
         });
 
         // Group products by category

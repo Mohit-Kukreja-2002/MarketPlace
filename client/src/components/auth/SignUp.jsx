@@ -1,8 +1,7 @@
 /* eslint-disable react/prop-types */
-import useSignup from '../hooks/auth/useSignup';
+import useSignup from '../../hooks/auth/useSignup';
 import { useState } from 'react'
-import '../index.css'
-
+import '../../index.css'
 const SignUp = ({setActivation}) => {
     const [signUpInputs, setSignUpInputs] = useState({
         email: "",

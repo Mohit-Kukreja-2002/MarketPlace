@@ -1,8 +1,8 @@
 import { useRef, useState } from "react";
 // import { toast } from "react-hot-toast";
 import { VscWorkspaceTrusted } from "react-icons/vsc";
-import useActivation from "../hooks/auth/useActivation";
-import { useAuthContext } from "../context/AuthContext";
+import useActivation from "../../hooks/auth/useActivation";
+import { useAuthContext } from "../../context/AuthContext";
 
 // eslint-disable-next-line react/prop-types
 const Activation = ({ setActivation }) => {

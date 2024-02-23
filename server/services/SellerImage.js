@@ -1,11 +1,11 @@
 import cloudinary from "cloudinary";
 
-export const addProductImage = async (req, res, next) => {
+export const addSellerImage = async (req, res, next) => {
     try {
         const { image } = req.body;
 
         const myCloud = await cloudinary.v2.uploader.upload(image, {
-            folder: "Product",
+            folder: "Seller",
             width: 150,
         });
         let ans = {
@@ -18,7 +18,7 @@ export const addProductImage = async (req, res, next) => {
             ans
         });
     } catch (error) {
-        console.log("Error in addProductImage: " + error.message);
+        console.log("Error in addSellerImage: " + error.message);
         return res.status(500).json({
             success:false,
             error: "Internal Server Error",
@@ -27,7 +27,7 @@ export const addProductImage = async (req, res, next) => {
 }
 
 
-export const deleteProductImage = async (req, res, next) => {
+export const deleteSellerImage = async (req, res, next) => {
     try {
         const { public_id } = req.body;
 
@@ -38,7 +38,7 @@ export const deleteProductImage = async (req, res, next) => {
         });
         
     } catch (error) {
-        console.log("Error in deleteProductImage: " + error.message);
+        console.log("Error in deleteSellerImage: " + error.message);
         return res.status(500).json({
             success:false,
             error: "Internal Server Error",

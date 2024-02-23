@@ -9,6 +9,9 @@ const SellerSchema = new Schema({
     shopName: {
         type: String,
     },
+    shopOwner: {
+        type: String,
+    },
     shopLocation: {
         type: String,
     },
@@ -31,6 +34,10 @@ const SellerSchema = new Schema({
     },
     phoneNumber: {
         type: String,
+    },
+    profileCompleted:{
+        type: Boolean,
+        default: false
     }
 
 }, { timestamps: true })

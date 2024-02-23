@@ -6,14 +6,16 @@ import bcrypt from 'bcrypt';
 dotenv.config();
 
 const ProductSchema = new Schema({
-    name: {
+    productName: {
         type: String,
+        required: [true, "Please enter the product name"]
     },
     price: {
         type: String,
+        required: [true, "Please enter the price of product"]
     },
     category: {
-        type: String
+        type: String,
     },
     status: {
         type: String,
@@ -23,11 +25,21 @@ const ProductSchema = new Schema({
         type: Number,
         default: 0,
     },
-    tags: [String],
+    discount: {
+        type: Number,
+        default: 0,
+    },
+    tags: {
+        type: String
+    },
     image: {
         public_id: String,
         url: String,
-    }
+    },
+    description: {
+        type: String,
+        required: [true, "Please specify a description for the product"]
+    },
 }, { timestamps: true })
 
 

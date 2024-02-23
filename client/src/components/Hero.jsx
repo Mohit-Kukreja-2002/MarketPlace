@@ -1,5 +1,5 @@
 import '../index.css'
-import SignUp from './SignUp'
+import SignUp from './auth/SignUp'
 import logo from '../assets/logobetter.png'
 import consumer from '../assets/consumer.png'
 import location from '../assets/location.png'
@@ -9,7 +9,7 @@ import { TfiMenuAlt } from "react-icons/tfi";
 import { IoBag } from "react-icons/io5";
 import { BiConversation } from "react-icons/bi";
 import { useState } from 'react'
-import Activation from './Activation'
+import Activation from './auth/Activation'
 import useLogin from '../hooks/auth/useLogin'
 import { useAuthContext } from '../context/AuthContext'
 

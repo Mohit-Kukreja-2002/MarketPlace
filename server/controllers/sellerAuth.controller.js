@@ -149,10 +149,10 @@ export const loginSeller = async (req, res) => {
 export const logoutSeller = async (req, res, next) => {
     try {
         res.cookie("jwt", "", { maxAge: 0 });
-        res.status(200).json({ message: "Logged out successfully" });
+        res.status(200).json({success:true, message: "Logged out successfully" });
     } catch (error) {
         console.log("Error in logout controller", error.message);
-        res.status(500).json({ error: "Internal Server Error" });
+        res.status(500).json({success:false, error: "Internal Server Error" });
     }
 }
 
@@ -184,7 +184,7 @@ export const authStatus = async(req,res) =>{
                 error: "JWT token has expired",
             });
         } else {
-            const seller = await Seller.findById(decoded.sellerId);
+            const seller = await Seller.findById(decoded.sellerId).select('-password');
 
             if (!seller) {
                 return res.status(400).json({
@@ -195,6 +195,7 @@ export const authStatus = async(req,res) =>{
 
             return res.status(200).json({
                 verified: true,
+                seller
             });
         }
     } catch (error) {

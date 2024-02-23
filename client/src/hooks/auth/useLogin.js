@@ -19,14 +19,14 @@ const useLogin = () => {
 			if (data.error) {
 				throw new Error(data.error);
 			}
-			if(data.success){
+			if(data?.success){
 				toast.success("Login Successful");
 			}
 
 			return new Promise((resolve) => {
 				setTimeout(() => {
 					resolve(data);
-				}, 1000);
+				}, 500);
 			});
 
 		} catch (error) {
