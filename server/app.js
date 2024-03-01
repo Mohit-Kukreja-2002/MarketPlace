@@ -6,6 +6,7 @@ import sellerAuthRouter from './routes/sellerAuth.route.js';
 import sellerFeatureRouter from './routes/sellerFeature.route.js';
 import fileUpload from 'express-fileupload';
 import bodyParser from 'body-parser';
+import buyerAuthRouter from './routes/buyerAuth.route.js';
 
 export const app = express();
 dotenv.config()
@@ -17,8 +18,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(fileUpload());
 
 app.use("/api/v1/",sellerAuthRouter,sellerFeatureRouter)
+app.use("/api/v1/",buyerAuthRouter);
 
-app.get("/test", (req, res, next) => {
+app.get("/test", (req, res) => {
     res.status(200).json({
         success: "true",
         message: "Api is working",

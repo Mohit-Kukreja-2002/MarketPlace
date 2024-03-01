@@ -48,5 +48,26 @@ function handleInputErrors(values,user) {
 		toast.error("There's nothing to update");
 		return false;
 	}
+
+    if(user.shopOwner && values.shopOwner===""){
+        toast.error("Please enter name of the shop owner!")
+        return false;
+    }
+    if(user.shopLocation && values.shopLocation===""){
+        toast.error("Please enter the shop Location!")
+        return false;
+    }
+    if(user.shopName && values.shopName===""){
+        toast.error("Please enter the shop Name!")
+        return false;
+    }
+    if(user.upi && values.upi===""){
+        toast.error("Please enter a valid upi id!")
+        return false;
+    }
+    if(user.phoneNumber && values.phoneNumber===""){
+        toast.error("Please enter a valid phone number!")
+        return false;
+    }
 	return true;
 }

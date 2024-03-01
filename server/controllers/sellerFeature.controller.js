@@ -25,7 +25,7 @@ export const updateSellerInfo = async (req, res) => {
     try {
         const sellerId = req.seller?._id;
         const { data } = req.body;
-        console.log(data)
+        // console.log(data)
         const updatedSeller = await Seller.findByIdAndUpdate(
             sellerId,
             { 
@@ -34,8 +34,11 @@ export const updateSellerInfo = async (req, res) => {
             { new: true } // Return the modified document rather than the original
         );
 
+        // console.log(updatedSeller)
+
         if(updatedSeller.shopName && updatedSeller.shopOwner && updatedSeller.shopLocation && updatedSeller.upi &&
             updatedSeller.phoneNumber) {
+                // console.log("here")
                 updatedSeller.profileCompleted = true;
                 await updatedSeller.save();
             }
@@ -56,6 +59,7 @@ export const updateSellerInfo = async (req, res) => {
 export const addProduct = async (req, res) => {
     try {
         const {data} = req.body;
+        // console.log(data);
 
         const sellerId = req.seller?._id;
         const seller = await Seller.findById(sellerId);
@@ -64,6 +68,7 @@ export const addProduct = async (req, res) => {
             const product = await Products.create(data);
             if (product) seller.products.push(product._id);
             await seller.save();
+            // console.log(product)
     
             res.status(200).json({
                 success: true,
@@ -89,9 +94,7 @@ export const addProduct = async (req, res) => {
 export const editProduct = async (req, res) => {
     try {
 
-        const data = req.body;
-
-        // const image = data.image;
+        const {data} = req.body;
 
         const productId = req.params.id;
 
@@ -107,31 +110,10 @@ export const editProduct = async (req, res) => {
 
         if (!productFound) {
             return res.status(400).json({
+                success:false,
                 error: "You are not authorized to edit this product"
             })
         }
-
-        // const productData = await Products.findById(productId);
-
-        // if (image && !image.startsWith("https")) {
-        //     await cloudinary.v2.uploader.destroy(fundraiserData.coverImg.public_id);
-
-        //     const myCloud = await cloudinary.v2.uploader.upload(coverImg, {
-        //         folder: "Product",
-        //     });
-
-        //     data.image = {
-        //         public_id: myCloud.public_id,
-        //         url: myCloud.secure_url,
-        //     };
-        // }
-
-        // if (coverImg && coverImg.startsWith("https")) {
-        //     data.coverImg = {
-        //         public_id: fundraiserData?.coverImg.public_id,
-        //         url: fundraiserData?.coverImg.url,
-        //     };
-        // }
 
         const product = await Products.findByIdAndUpdate(
             productId,
@@ -140,8 +122,6 @@ export const editProduct = async (req, res) => {
             },
             { new: true }
         );
-
-        // await redis.set(fundId, JSON.stringify(fund)); // update course in redis
 
         res.status(200).json({
             success: true,
@@ -152,6 +132,7 @@ export const editProduct = async (req, res) => {
     } catch (error) {
         console.log("Error in editProduct: " + error.message);
         return res.status(500).json({
+            success: true,
             error: "Internal Server Error",
         })
     }
@@ -174,6 +155,7 @@ export const deleteProduct = async (req, res) => {
 
         if (!productFound) {
             return res.status(400).json({
+                success:false,
                 error: "You are not authorized to delete this product"
             });
         }
@@ -193,6 +175,7 @@ export const deleteProduct = async (req, res) => {
     } catch (error) {
         console.log("Error in deleteProduct: " + error.message);
         return res.status(500).json({
+            success: false,
             error: "Internal Server Error",
         })
     }
@@ -233,7 +216,7 @@ export const getSellerProductsByCategory = async (req, res) => {
 
         // If seller not found, return an error response
         if (!seller) {
-            return res.status(404).json({ error: "Seller not found" });
+            return res.status(404).json({ success: false,error: "Seller not found" });
         }
 
         // Get all products associated with the seller
@@ -258,6 +241,6 @@ export const getSellerProductsByCategory = async (req, res) => {
         });
     } catch (error) {
         console.log("Error in getSellerProductsByCategory: " + error.message);
-        return res.status(500).json({ error: "Internal Server Error" });
+        return res.status(500).json({ success:false, error: "Internal Server Error" });
     }
 };

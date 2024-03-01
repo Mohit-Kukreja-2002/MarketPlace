@@ -9,7 +9,6 @@ const useLogout = () => {
 		try {
 			const res = await fetch("/api/v1/logoutSeller", {
 				method: "GET",
-				headers: { "Content-Type": "application/json" },
 			});
 
 			const data = await res.json();
