@@ -1,29 +1,24 @@
 import cloudinary from "cloudinary";
 
-export const addBuyerImage = async (req, res) => {
-    const { image } = req.body;
-
+export const addBuyerImage = async (image) => {
     try {
         const myCloud = await cloudinary.v2.uploader.upload(image, {
             folder: "Buyers",
             width: 150,
         });
         let ans = {
+            success:true,
             public_id: myCloud.public_id,
             url: myCloud.secure_url,
         };
-
-        res.status(200).json({
-            success: true,
-            ans
-        });
-
+        return ans;
     } catch (error) {
-        console.log("Error in addBuyerImage: " + error.message);
-        return res.status(500).json({
+        console.log("Error in addBuyerImage: " + error);
+        return {
             success: false,
-            error: "Internal Server Error",
-        })
+            public_id: "",
+            url: "",
+        }
     }
 }
 

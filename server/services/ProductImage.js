@@ -30,9 +30,10 @@ export const addProductImage = async (req, res, next) => {
 export const deleteProductImage = async (req, res, next) => {
     try {
         const { public_id } = req.body;
+        // console.log(public_id)
 
         await cloudinary.v2.uploader.destroy(public_id);
-
+        // console.log("success")
         res.status(200).json({
             success: true,
         });

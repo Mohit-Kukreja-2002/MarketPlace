@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import Buyer from '../models/buyer.js'
 export const isAuthenticated = async (req, res, next) => {
-    const access_token = req.cookies.jwt;
+    const access_token = req.cookies.accessToken;
 
     if (!access_token) {
         return res.status(400).json({
@@ -10,7 +10,7 @@ export const isAuthenticated = async (req, res, next) => {
     }
 
     try {
-        const decoded = jwt.verify(access_token, process.env.JWT_SECRET);
+        const decoded = jwt.verify(access_token, process.env.ACCESS_TOKEN_SECRET);
 
         if (!decoded) {
             return res.status(400).json({
@@ -25,7 +25,7 @@ export const isAuthenticated = async (req, res, next) => {
                 success: false
             });
         } else {
-            const buyer = await Buyer.findById(decoded.buyerId);
+            const buyer = await Buyer.findById(decoded._id);
 
             if (!buyer) {
                 return res.status(400).json({
@@ -34,11 +34,11 @@ export const isAuthenticated = async (req, res, next) => {
                 });
             }
 
-            req.buyer = buyer;
+            req.user = buyer;
             next();
         }
     } catch (error) {
-        console.log("Error is IsAuthenticated", error.message)
+        console.log("Error is IsAuthenticated", error)
         return res.status(500).json({
             error: "Internal Server Error",
             success: false,

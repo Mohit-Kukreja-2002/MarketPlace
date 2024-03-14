@@ -32,10 +32,10 @@ const ProductSchema = new Schema({
     tags: {
         type: String
     },
-    image: {
+    image:[{
         public_id: String,
         url: String,
-    },
+    }],
     description: {
         type: String,
         required: [true, "Please specify a description for the product"]

@@ -1,5 +1,8 @@
 import mongoose, { Schema } from 'mongoose';
 import bcrypt from 'bcrypt';
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+dotenv.config();
 
 const BuyerSchema = new Schema({
     name: {
@@ -10,7 +13,8 @@ const BuyerSchema = new Schema({
     email: {
         type: String,
         required: [true, "Please enter your email"],
-        unique: true
+        unique: true,
+        index: true,
     },
 
     password: {
@@ -23,7 +27,18 @@ const BuyerSchema = new Schema({
         type: String,
     },
 
-    wishlist: [String]
+    wishlist: [
+        String
+    ],
+
+    avatar: {
+        type: String,
+    },
+
+    refreshToken: {
+        type: String,
+    }
+
 }, { timestamps: true })
 
 BuyerSchema.pre('save', async function (next) {
@@ -39,8 +54,34 @@ BuyerSchema.pre('save', async function (next) {
 });
 
 // Compare password method
-BuyerSchema.methods.comparePassword = function (enteredPassword) {
-    return bcrypt.compareSync(enteredPassword, this.password)
+BuyerSchema.methods.comparePassword =  function (password) {
+    return bcrypt.compareSync(password, this.password)
 }
+
+BuyerSchema.methods.generateAccessToken = function () {
+    console.log("access")
+    return jwt.sign(
+        {
+            _id: this._id,
+            email: this.email,
+        },
+        process.env.ACCESS_TOKEN_SECRET,
+        {
+            expiresIn: process.env.ACCESS_TOKEN_EXPIRY
+        }
+    )
+} 
+
+BuyerSchema.methods.generateRefreshToken = function () {
+    return jwt.sign(
+        {
+            _id: this._id,
+        },
+        process.env.REFRESH_TOKEN_SECRET,
+        {
+            expiresIn: process.env.REFRESH_TOKEN_EXPIRY
+        }
+    )
+} 
 
 export default mongoose.models.Buyer || mongoose.model('Buyer', BuyerSchema);

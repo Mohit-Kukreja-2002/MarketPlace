@@ -21,31 +21,39 @@ const AddProduct = () => {
         status: "In stock",
         tags: "",
         description: "",
-        image: {
-            public_id: "",
-            url: "",
-        }
+        image: [],
     })
 
     const imageHandler = async (e) => {
-        const fileReader = new FileReader();
+        const files = e.target.files;
+        // const uploadPromises = [];
 
-        fileReader.onload = async () => {
-            if (fileReader.readyState === 2) {
-                const image = fileReader.result;
-                let prevImage = values.image.public_id;
-                let response = await addImage(image);
-                if (response.success) {
-                    toast.success("Image added successfully");
-                    values.image.public_id = response.ans.public_id;
-                    values.image.url = response.ans.url;
-                    if (prevImage != '') {
-                        removeImage(prevImage);
+        for (let i = 0; i < files.length; i++) {
+            if(i==0){
+                for (let image of values.image) {
+                    if (image.public_id && image.public_id !== '') removeImage(image.public_id)
+                }
+                values.image = [];
+            }
+            const file = files[i];
+            const fileReader = new FileReader();
+
+            fileReader.onload = async () => {
+                if (fileReader.readyState === 2) {
+                    const image = fileReader.result;
+                    let response = await addImage(image);
+                    if (response.success) {
+                        values.image.push({
+                            "public_id": response.ans.public_id,
+                            "url": response.ans.url,
+                        })
                     }
                 }
-            }
-        };
-        fileReader.readAsDataURL(e.target.files[0]);
+            };
+            
+            fileReader.readAsDataURL(file);
+        }
+        toast.success(`Images added successfully`);
     };
 
     const handleSubmit = async (e) => {
@@ -148,14 +156,13 @@ const AddProduct = () => {
                         <div className="flex justify-center px-6 pt-5 pb-6 mt-1 border-2 border-gray-300 border-dashed rounded-md">
                             <div className="space-y-1 text-center">
                                 {
-                                    values.image?.url ?
-                                        <img src={values.image.url} className="w-12 h-12 mx-auto" />
-                                        :
-                                        <svg className="w-16 h-16 mx-auto text-black" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                                    (values.image.length > 0 && values.image[0].url)
+                                        ? <img src={values.image[0].url} className="w-12 h-12 mx-auto" />
+                                        : <svg className="w-16 h-16 mx-auto text-black" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
                                             <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                                         </svg>
                                 }
-                                <input onChange={imageHandler} className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none" aria-describedby="file_input_help" id="file_input" type="file" />
+                                <input multiple onChange={imageHandler} className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none" aria-describedby="file_input_help" id="file_input" type="file" />
                                 <p className="mt-1 text-sm text-black" id="file_input_help">PNG, JPG, JPEG  (MAX. 10MB).</p>
                             </div>
                         </div>

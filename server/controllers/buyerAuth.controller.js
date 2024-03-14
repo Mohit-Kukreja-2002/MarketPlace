@@ -1,37 +1,116 @@
-import Buyer from "../models/buyer.js";
-import dotenv from 'dotenv';
 import { dirname } from 'path';
 import { fileURLToPath } from "url";
 import jwt from "jsonwebtoken";
 import path from "path";
 import ejs from "ejs";
+import fs from "fs"
+
+import Buyer from "../models/buyer.js";
 import sendMail from "../sendMail.js";
 import generateTokenAndSetCookie from "../utils/generateTokenBuyer.js";
+import { uploadBuyerImage } from "../utils/buyerImageUpload.js";
+
+import dotenv from 'dotenv';
+import { addBuyerImage } from '../services/BuyerImage.js';
 dotenv.config();
+
+const options = {
+    httpOnly: true,
+    secure: true
+}
+
+const deleteFileFromLocal = async (filePath) => {
+    fs.unlink(filePath, (err) => {
+        if (err) {
+            console.error("Error deleting file:", err);
+        }
+    });
+}
+
+const generateAccessAndRefreshTokens = async (userId) => {
+    try {
+        const buyer = await Buyer.findById(userId)
+        const accessToken = buyer.generateAccessToken()
+        const refreshToken = buyer.generateRefreshToken();
+
+
+        buyer.refreshToken = refreshToken
+        await buyer.save({ validateBeforeSave: false })
+
+        return { accessToken, refreshToken, success: true }
+
+    } catch (error) {
+        return { accessToken: "", refreshToken: "", success: false }
+    }
+}
 
 export const registerBuyer = async (req, res) => {
     try {
-        const { name,email, password } = req.body;
+        const { name, email, password } = req.body;
+
+        if ([name, email, password].some((field) => field?.trim() === "")) {
+            return res.status(400).json({
+                success: false,
+                error: "Please fill in all the fields"
+            });
+        }
 
         if (password.length < 8) {
             return res.status(400).json({
+                success: false,
                 error: "Password must be at least 8 characters"
             });
         }
 
-        let buyer = await Buyer.findOne({ email });
+        let buyer = await Buyer.findOne({ $or: [{ email }] });
         if (buyer) {
-            return res.status(400).json({ 
+            return res.status(400).json({
                 success: false,
-                error: "This email is already registered with another account" 
+                error: "This email is already registered with another account"
+            })
+        }
+
+        const avatar = req.files?.avatar[0] || req.files?.avatar;
+        if (!avatar) {
+            return res.status(400).json({
+                success: false,
+                error: "Avatar is required"
+            })
+        }
+
+        // Define the destination directory where you want to save the uploaded file
+        const uploadDirectory = './uploads/';
+
+        // Check if the directory exists, if not, create it
+        if (!fs.existsSync(uploadDirectory)) {
+            fs.mkdirSync(uploadDirectory, { recursive: true });
+        }
+
+        // Move the uploaded file to the upload directory
+        let localeFilePath = uploadDirectory + avatar.name
+        await avatar.mv(uploadDirectory + avatar.name, function (err) {
+            if (err) {
+                console.log("Error uploading file:", err);
+            }
+        });
+
+        const { public_id, url, success } = await addBuyerImage(localeFilePath)
+        if (!success) {
+            deleteFileFromLocal(localeFilePath)
+            return res.status(400).json({
+                success: false,
+                error: "Issue setting avatar"
             })
         }
 
         buyer = ({
-            name:name,
+            name: name,
             email: email,
             password: password,
+            avatar: url
         })
+
+        deleteFileFromLocal(localeFilePath)
 
         const activationToken = createActivationToken(buyer);
 
@@ -59,17 +138,16 @@ export const registerBuyer = async (req, res) => {
                 activationToken: activationToken.token,
             });
         } catch (error) {
-            console.log(error.message)
-            // success:false,
-            return res.status(400).json({ 
-                error: "Error sending email" ,
+            // console.log(error.message)
+            return res.status(400).json({
                 success: false,
+                error: "Error sending email",
             });
         }
 
     } catch (error) {
         console.log("error in signup controller: ", error);
-        res.status(500).json({ 
+        res.status(500).json({
             error: "Internal Server error",
             success: false,
         });
@@ -94,23 +172,26 @@ export const createActivationToken = (buyer) => {
 export const activateBuyer = async (req, res) => {
     try {
         const { activation_token, activation_code } = req.body;
+
         const newBuyer = jwt.verify(
             activation_token,
             process.env.ACTIVATION_SECRET,
         )
+
         if (newBuyer.activationCode !== activation_code) {
-            return res.status(400).json({ 
+            return res.status(400).json({
+                success: false,
                 error: "Incorrect activation code",
-                success:false,
             });
         }
 
-        const { email, password, name } = newBuyer.buyer;
+        const { email, password, name, avatar } = newBuyer.buyer;
+
         const existBuyer = await Buyer.findOne({ email });
         if (existBuyer) {
-            return res.status(400).json({ 
+            return res.status(400).json({
                 error: "This email is already registered with another account",
-                success:false,
+                success: false,
             });
         }
 
@@ -118,9 +199,14 @@ export const activateBuyer = async (req, res) => {
             name,
             email,
             password,
+            avatar
         });
 
-        req.body = { email, password, name }
+        req.body = { email, password }
+        // return res.status(200).json({
+        //     success: true,
+        //     buyer
+        // })
         await loginBuyer(req, res);
     }
     catch (error) {
@@ -133,11 +219,13 @@ export const activateBuyer = async (req, res) => {
 export const loginBuyer = async (req, res) => {
     try {
         const { email, password } = req.body;
+
         if (!email || !password) {
             return res.status(400).json({
                 error: "All the credentials are required"
             })
         }
+
         const buyer = await Buyer.findOne({ email }).select("+password");
         if (!buyer) {
             return res.status(400).json({ error: "Invalid credentials", success: false });
@@ -148,13 +236,24 @@ export const loginBuyer = async (req, res) => {
             return res.status(400).json({ error: "Invalid credentials", success: false });
         }
 
-        generateTokenAndSetCookie(buyer._id, res);
+        const { accessToken, refreshToken, success } = await generateAccessAndRefreshTokens(buyer._id)
+        if (!success) {
+            return res.status(400).json({
+                success: false,
+                error: "Invalid credentials",
+            })
+        }
 
-        await buyer.save();
-        res.status(200).json({
-            success: true,
-            buyer
-        });
+        // const loggedInBuyer = await Buyer.findById(buyer._id).select("-password -refreshToken")
+
+        return res.status(200).cookie("accessToken", accessToken, options)
+            .cookie("refreshToken", refreshToken, options).json({
+                // user: loggedInBuyer,
+                accessToken,
+                refreshToken,
+                message: "User logged In Successfully",
+                success: true,
+            })
 
     } catch (error) {
         console.log("Error in loginBuyer", error.message);
@@ -162,12 +261,89 @@ export const loginBuyer = async (req, res) => {
     }
 }
 
+// export const logoutBuyer = async (req, res) => {
+//     try {
+//         res.cookie("jwt", "", { maxAge: 0 });
+//         res.status(200).json({ message: "Logged out successfully" });
+//     } catch (error) {
+//         console.log("Error in logout controller", error.message);
+//         res.status(500).json({ error: "Internal Server Error" });
+//     }
+// }
+
 export const logoutBuyer = async (req, res) => {
     try {
-        res.cookie("jwt", "", { maxAge: 0 });
-        res.status(200).json({ message: "Logged out successfully" });
+        await Buyer.findByIdAndUpdate(req.user._id,
+            {
+                $unset: {
+                    refreshToken: 1 // this removes the field from document
+                }
+            },
+            {
+                new: true
+            }
+        )
+
+        return res.status(200).clearCookie("accessToken", options)
+            .clearCookie("refreshToken", options)
+            .json({
+                success: true,
+                message: "Successfully logged out",
+            })
     } catch (error) {
-        console.log("Error in logout controller", error.message);
+        console.log("Error in logout controller", error);
         res.status(500).json({ error: "Internal Server Error" });
+    }
+}
+
+export const refreshAccessToken = async (req, res) => {
+    const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken
+
+
+    if (!incomingRefreshToken) {
+        return res.status(401).json({
+            success: false,
+            error: "unauthorized request"
+        })
+    }
+
+    try {
+
+        const decodedToken = jwt.verify(
+            incomingRefreshToken,
+            process.env.REFRESH_TOKEN_SECRET
+        )
+
+        const buyer = await Buyer.findById(decodedToken?._id)
+
+        if (!buyer) {
+            return res.status(401).json({
+                success: false,
+                error: "Invalid refresh token"
+            })
+        }
+
+        if (incomingRefreshToken !== buyer?.refreshToken) {
+            return res.status(401).json({
+                success: false,
+                error: "Invalid Refresh token"
+            })
+        }
+
+        const { accessToken, newRefreshToken } = await generateAccessAndRefreshTokens(buyer._id)
+
+        return res
+            .status(200)
+            .cookie("accessToken", accessToken, options)
+            .cookie("refreshToken", newRefreshToken, options)
+            .json(
+                new ApiResponse(
+                    200,
+                    { accessToken, refreshToken: newRefreshToken },
+                    "Access token refreshed"
+                )
+            )
+    } catch (error) {
+        throw new ApiError(401, error?.message || "Invalid refresh token")
     }
 }
