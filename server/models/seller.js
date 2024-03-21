@@ -38,6 +38,11 @@ const SellerSchema = new Schema({
     profileCompleted:{
         type: Boolean,
         default: false
+    },
+    conversationList: {
+        type: [Schema.Types.ObjectId], // Array of conversation IDs
+        ref: "Conversation",
+        default: [] // Initialize as an empty array
     }
 
 }, { timestamps: true })

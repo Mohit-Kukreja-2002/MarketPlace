@@ -4,8 +4,9 @@ export const isAuthenticated = async (req, res, next) => {
     const access_token = req.cookies.accessToken;
 
     if (!access_token) {
-        return res.status(400).json({
-            error: "First login to proceed"
+        return res.status(200).json({
+            error: "First login to proceed",
+            success: false,
         });
     }
 
@@ -13,22 +14,23 @@ export const isAuthenticated = async (req, res, next) => {
         const decoded = jwt.verify(access_token, process.env.ACCESS_TOKEN_SECRET);
 
         if (!decoded) {
-            return res.status(400).json({
+            return res.status(200).json({
                 error: "JWT token is not valid",
+                success: false,
             });
         }
 
         // Check if the access token is expired
         if (decoded.exp && decoded.exp <= Date.now() / 1000) {
-            return res.status(400).json({
+            return res.status(200).json({
                 error: "JWT token has expired",
                 success: false
             });
         } else {
-            const buyer = await Buyer.findById(decoded._id);
+            const buyer = await Buyer.findById(decoded._id).select("-password -refreshToken");
 
             if (!buyer) {
-                return res.status(400).json({
+                return res.status(200).json({
                     error: "First login to proceed",
                     success: false,
                 });

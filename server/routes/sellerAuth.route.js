@@ -8,10 +8,11 @@ const sellerAuthRouter = express.Router();
 sellerAuthRouter.post('/registerSeller', registerSeller);
 sellerAuthRouter.post('/activateSeller', activateSeller);
 sellerAuthRouter.post('/loginSeller', loginSeller);
+sellerAuthRouter.post('/addSellerImage', addSellerImage)
+sellerAuthRouter.post('/deleteSellerImage', deleteSellerImage)
+
 sellerAuthRouter.get('/logoutSeller', isAuthenticated, logoutSeller);
 sellerAuthRouter.get('/isLoggedIn', authStatus);
 
-sellerAuthRouter.post('/addSellerImage', addSellerImage)
-sellerAuthRouter.post('/deleteSellerImage', deleteSellerImage)
 
 export default sellerAuthRouter

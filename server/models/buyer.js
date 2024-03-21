@@ -37,6 +37,12 @@ const BuyerSchema = new Schema({
 
     refreshToken: {
         type: String,
+    },
+
+    conversationList: {
+        type: [Schema.Types.ObjectId], // Array of conversation IDs
+        ref: "Conversation",
+        default: [] // Initialize as an empty array
     }
 
 }, { timestamps: true })

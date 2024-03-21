@@ -40,6 +40,9 @@ const ProductSchema = new Schema({
         type: String,
         required: [true, "Please specify a description for the product"]
     },
+    creator: {
+        type: String,
+    }
 }, { timestamps: true })
 
 

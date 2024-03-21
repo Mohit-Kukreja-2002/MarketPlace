@@ -1,8 +1,17 @@
 import Products from '../models/products.js';
+import { redis } from '../utils/redis.js'
 
 export const getCategorisedProducts = async (req, res) => {
     try {
         // keywords for each category
+        const cachedProducts = await redis.get('categorised_products');
+        if (cachedProducts) {
+            return res.status(200).json({
+                success: true,
+                categorizedProducts: JSON.parse(cachedProducts)
+            })
+        }
+
         const categories = [
             {
                 category: "Clothes",
@@ -87,6 +96,8 @@ export const getCategorisedProducts = async (req, res) => {
             }
         }
         // console.log(categorizedProducts)
+
+        redis.set('categorised_products', JSON.stringify(categorizedProducts), 'EX', "1800")
         // Return the categorized products
         res.status(200).json({
             success: true,
@@ -103,10 +114,27 @@ export const getCategorisedProducts = async (req, res) => {
 
 export const newArrivalProducts = async (req, res) => {
     try {
-        // console.log("here")
+
+        const cachedClothes = await redis.get('clothes');
+        const cachedFootwears = await redis.get('footwears');
+        const cachedAccessories = await redis.get('accessories');
+        if (cachedClothes && cachedFootwears && cachedAccessories) {
+            return res.status(200).json({
+                success: true,
+                clothes: JSON.parse(cachedClothes),
+                footwears: JSON.parse(cachedFootwears),
+                accessories: JSON.parse(cachedAccessories)
+            })
+        }
+
         const clothes = await Products.find().sort({ createdAt: -1 }).limit(8);
         const footwears = await Products.find().sort({ createdAt: -1 }).skip(8).limit(8);
         const accessories = await Products.find().sort({ createdAt: -1 }).skip(16).limit(8);
+
+        redis.set("clothes", JSON.stringify(clothes), 'EX', 1800)
+        redis.set("footwears", JSON.stringify(footwears), 'EX', 1800)
+        redis.set("accessories", JSON.stringify(accessories), 'EX', 1800)
+
         res.status(200).json({
             success: true,
             clothes,
@@ -125,15 +153,25 @@ export const newArrivalProducts = async (req, res) => {
 
 export const dealOfDay = async (req, res) => {
     try {
-        const randomProducts = await Products.aggregate([{ $sample: { size: 2 } }]);
 
+        const cacheDealOfDay = await redis.get("dealOfDay");
+        if (cacheDealOfDay) {
+            return res.status(200).json({
+                success: true,
+                products: JSON.parse(cacheDealOfDay)
+            });
+        }
+
+        const randomProducts = await Products.aggregate([{ $sample: { size: 2 } }]);
+        await redis.set("dealOfDay", JSON.stringify(randomProducts), 'EX', 86400 );
+    
         res.status(200).json({
             success: true,
             products: randomProducts
         });
 
     } catch (e) {
-        console.log("Error retrieving deal of day products:", error);
+        console.log("Error retrieving deal of day products:", e);
         res.status(500).json(({
             success: false,
             message: "Internal Servel Error"
@@ -143,15 +181,25 @@ export const dealOfDay = async (req, res) => {
 
 export const featuredProducts = async (req, res) => {
     try {
+
+        const cachedProducts = await redis.get("featuredProducts")
+        if(cachedProducts) {
+            return res.status(200).json({
+                success: true,
+                products: JSON.parse(cachedProducts)
+            })
+        }
+
         // Get 12 random products from the collection
         const randomProducts = await Products.aggregate([{ $sample: { size: 12 } }]);
+        await redis.set("featuredProducts", JSON.stringify(randomProducts), 'EX', 1800)
 
         res.status(200).json({
             success: true,
             products: randomProducts
         });
     } catch (error) {
-        console.log("Error retrieving random products:", error);
+        console.log("Error retrieving random products: ", error);
         res.status(500).json({
             success: false,
             message: "Internal Server Error"
@@ -161,6 +209,15 @@ export const featuredProducts = async (req, res) => {
 
 export const getCategories = async (req, res) => {
     try {
+
+        const cachedProducts = await redis.get("categories");
+        if(cachedProducts){
+            return res.status(200).json({
+                success: true,
+                result: JSON.parse(cachedProducts)
+            })
+        }
+
         const categories = {
             "Clothes": ["shirt", "t-shirt", "tshirt", "top", "blouse", "tee", "shorts", "jeans", "pants", "trousers", "denim", "bottoms", "jacket", "sweaters", "coat", "hoodie", "blazer", "outerwear", "dress", "frock", "gown", "skirt", "maxi dress", "sweatshirt", "polo shirt", "tank top", "crop top", "cardigan", "sweatpants", "leggings", "jumpsuit", "romper", "overalls", "tunic", "pullover", "vest", "kimono", "bodysuit", "peplum top", "camisole", "tie-dye shirt", "wrap dress", "midi skirt", "flared jeans"],
             "Winters": ["winter jacket", "coat", "sweater", "scarf", "beanie", "gloves", "thermal wear", "snow boots", "winter boots", "snow pants", "puffer jacket", "fleece jacket", "down jacket", "parka", "trench coat", "cashmere sweater", "wool scarf", "earmuffs", "muffler", "snowboard jacket", "ski jacket", "faux fur coat", "chunky sweater", "knit scarf", "shearling coat", "quilted jacket", "polar fleece", "thick socks"],
@@ -174,10 +231,12 @@ export const getCategories = async (req, res) => {
 
         const result = {};
 
-        for(const category in categories){
+        for (const category in categories) {
             const productCount = await Products.countDocuments({ tags: { $in: categories[category] } });
-            result[category]= productCount;
+            result[category] = productCount;
         }
+
+        await redis.set("categories", JSON.stringify(result), 'EX', 1800);
 
         res.status(200).json({
             success: true,
@@ -192,4 +251,194 @@ export const getCategories = async (req, res) => {
         })
     }
 
+}
+
+export const getProductById = async (req, res) => {
+    try {
+
+        const id = req.params.id;
+
+        const cachedProducts = await redis.get(id);
+        if(cachedProducts){
+            return res.status(200).json({
+                success: true,
+                product: JSON.parse(cachedProducts)
+            })
+        }
+
+        const product = await Products.findById(id);
+        
+        if (product) {
+            await redis.set(id, JSON.stringify(product), 'EX', 900)
+            res.status(200).json({
+                success: true,
+                product
+            })
+        } else {
+            res.status(200).json({
+                success: false,
+                error: "No Such Product exists"
+            })
+        }
+    } catch (error) {
+        console.log("Error in retrieving productById: ", error);
+        res.status(500).json({
+            success: false,
+            error: "Internal Server Error"
+        })
+    }
+}
+
+export const getProductBySearch = async (req, res) => {
+    try {
+        let query = req.params.query;
+        const page = parseInt(req.params.page) || 1; // Default to page 1 if not provided
+        const limit = 12; // Adjust the limit as needed
+
+        query = query.replace("%20", " ");
+
+        // Split the query by spaces to get individual components
+        const regexQuery = new RegExp(query.split(" ").join("|"), "i");
+
+        const skip = (page - 1) * limit;
+
+        // Find products with exact match in productName
+        let exactMatchProducts = [];
+        if (page === 1) exactMatchProducts = await Products.find({ productName: query });
+
+        // Find products where any keyword matches productName, category, or tags
+        const keywordMatchProducts = await Products.find({
+            $or: [
+                { productName: query },
+                { productName: { $regex: regexQuery } },
+                { category: { $regex: regexQuery } },
+                { tags: { $regex: regexQuery } }
+            ]
+        })
+            .skip(skip)
+            .limit(limit);
+
+        // Combine the results from both queries
+        let combinedProducts = [...exactMatchProducts, ...keywordMatchProducts];
+
+        // Filter out duplicate products
+        combinedProducts = await Products.aggregate([
+            { $match: { _id: { $in: combinedProducts.map(product => product._id) } } },
+            { $group: { _id: "$_id", product: { $first: "$$ROOT" } } },
+            { $replaceRoot: { newRoot: "$product" } }
+        ]);
+
+        if (combinedProducts.length > 0) {
+            res.status(200).json({
+                success: true,
+                products: combinedProducts
+            });
+        } else {
+            res.status(200).json({
+                success: false,
+                error: "No products found"
+            });
+        }
+    } catch (error) {
+        console.log("Error in retrieving productBySearch: ", error);
+        res.status(500).json({
+            success: false,
+            error: "Internal Server Error"
+        });
+    }
+}
+
+export const addToWishlist = async (req, res) => {
+    try {
+        const { id } = req.body;
+        const { user } = req;
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                error: 'User not found'
+            });
+        }
+
+        // Update the user's wishlist array
+
+        if (!user.wishlist.includes(id)) {
+            user.wishlist.push(id);
+            // Save the updated user document without validation
+            await user.save({ validateBeforeSave: false });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'Product added to wishlist successfully'
+        });
+
+    } catch (error) {
+        console.log("Error in addToWishlist: ", error);
+        res.status(500).json({
+            success: false,
+            error: "Internal Server Error"
+        });
+    }
+}
+
+export const likedProducts = async (req, res) => {
+    try {
+        const { user } = req;
+        if (!user) {
+            return res.status(401).json({
+                success: false,
+                error: "User not authenticated"
+            });
+        }
+
+        // Retrieve the user's wishlist
+        const wishlist = user.wishlist;
+
+        // Fetch the details of the liked products from the database using the wishlist
+        const likedProductDetails = await Products.find({ _id: { $in: wishlist } });
+
+        // Send the list of liked product details as a response
+        res.status(200).json({
+            success: true,
+            likedProducts: likedProductDetails
+        });
+    } catch (error) {
+        console.log("Error in getLikedProducts: ", error);
+        res.status(500).json({
+            success: false,
+            error: "Internal Server Error"
+        });
+    }
+}
+
+export const removeFromWishlist = async (req, res) => {
+    try {
+        const { id } = req.body;
+        const { user } = req;
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                error: 'User not found'
+            });
+        }
+
+        // Update the user's wishlist array
+
+        user.wishlist = user.wishlist.filter(itemId => itemId !== id)
+        await user.save({ validateBeforeSave: false });
+
+        res.status(200).json({
+            success: true,
+            message: 'Product added to wishlist successfully'
+        });
+
+    } catch (error) {
+        console.log("Error in removeFromWishlist: ", error);
+        res.status(500).json({
+            success: false,
+            error: "Internal Server Error"
+        });
+    }
 }

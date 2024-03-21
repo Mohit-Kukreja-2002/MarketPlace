@@ -28,20 +28,20 @@ export const updateSellerInfo = async (req, res) => {
         // console.log(data)
         const updatedSeller = await Seller.findByIdAndUpdate(
             sellerId,
-            { 
-                $set: data 
+            {
+                $set: data
             }, // Update the seller document with the data object
             { new: true } // Return the modified document rather than the original
         );
 
         // console.log(updatedSeller)
 
-        if(updatedSeller.shopName && updatedSeller.shopOwner && updatedSeller.shopLocation && updatedSeller.upi &&
+        if (updatedSeller.shopName && updatedSeller.shopOwner && updatedSeller.shopLocation && updatedSeller.upi &&
             updatedSeller.phoneNumber) {
-                // console.log("here")
-                updatedSeller.profileCompleted = true;
-                await updatedSeller.save();
-            }
+            // console.log("here")
+            updatedSeller.profileCompleted = true;
+            await updatedSeller.save();
+        }
 
         res.status(200).json({
             success: true,
@@ -58,18 +58,19 @@ export const updateSellerInfo = async (req, res) => {
 
 export const addProduct = async (req, res) => {
     try {
-        const {data} = req.body;
-        // console.log(data);
+        const data = req.body;
 
         const sellerId = req.seller?._id;
         const seller = await Seller.findById(sellerId);
+        
+        data.creator = sellerId
 
         try {
             const product = await Products.create(data);
             if (product) seller.products.push(product._id);
             await seller.save();
             // console.log(product)
-    
+
             res.status(200).json({
                 success: true,
                 message: "Product added successfully",
@@ -79,7 +80,7 @@ export const addProduct = async (req, res) => {
             console.log(error.message);
             res.status(400).send({
                 success: false,
-                error:error.message
+                error: error.message
             });
         }
     } catch (error) {
@@ -94,7 +95,7 @@ export const addProduct = async (req, res) => {
 export const editProduct = async (req, res) => {
     try {
 
-        const {data} = req.body;
+        const { data } = req.body;
 
         const productId = req.params.id;
 
@@ -110,7 +111,7 @@ export const editProduct = async (req, res) => {
 
         if (!productFound) {
             return res.status(400).json({
-                success:false,
+                success: false,
                 error: "You are not authorized to edit this product"
             })
         }
@@ -155,7 +156,7 @@ export const deleteProduct = async (req, res) => {
 
         if (!productFound) {
             return res.status(400).json({
-                success:false,
+                success: false,
                 error: "You are not authorized to delete this product"
             });
         }
@@ -216,7 +217,7 @@ export const getSellerProductsByCategory = async (req, res) => {
 
         // If seller not found, return an error response
         if (!seller) {
-            return res.status(404).json({ success: false,error: "Seller not found" });
+            return res.status(404).json({ success: false, error: "Seller not found" });
         }
 
         // Get all products associated with the seller
@@ -241,6 +242,38 @@ export const getSellerProductsByCategory = async (req, res) => {
         });
     } catch (error) {
         console.log("Error in getSellerProductsByCategory: " + error.message);
-        return res.status(500).json({ success:false, error: "Internal Server Error" });
+        return res.status(500).json({ success: false, error: "Internal Server Error" });
     }
 };
+
+
+export const getSellerInfoById = async (req, res) => {
+    try {
+        const sellerId = req.body.id;
+
+        // Find the seller by ID
+        const seller = await Seller.findById(sellerId);
+
+
+        // If seller not found, return an error response
+        if (!seller) {
+            console.log("inside")
+            return res.status(200).json({ success: false, error: "Seller not found" });
+        }
+
+        let user = {
+            shopName: seller.shopName,
+            shopOwner: seller.shopOwner,
+            avatar: seller.avatar,
+            upi: seller.upi,
+        }
+
+        return res.status(200).json({
+            success: true,
+            user
+        });
+    } catch (error) {
+        console.log("Error in getSellerInfoById: " + error.message);
+        return res.status(500).json({ success: false, error: "Internal Server Error" });
+    }
+}
