@@ -25,14 +25,14 @@ const refreshTokenExpire = process.env.REFRESH_TOKEN_EXPIRY || '10d'
 const expiresInMs = ms(accessTokenExpire);
 const expiresInMsRefresh = ms(refreshTokenExpire);
 
-const accessTokenOptions = {
+export const accessTokenOptions = {
     expires: new Date(Date.now() + expiresInMs),
     maxAge: expiresInMs,
     httpOnly: true,
     sameSite: 'lax',
     secure: false
 };
-const refreshTokenOptions = {
+export const refreshTokenOptions = {
     expires: new Date(Date.now() + expiresInMsRefresh),
     maxAge: expiresInMsRefresh,
     httpOnly: true,
@@ -48,7 +48,7 @@ const deleteFileFromLocal = async (filePath) => {
     });
 }
 
-const generateAccessAndRefreshTokens = async (userId) => {
+export const generateAccessAndRefreshTokens = async (userId) => {
     try {
         const buyer = await Buyer.findById(userId)
         const accessToken = buyer.generateAccessToken()
@@ -227,10 +227,7 @@ export const activateBuyer = async (req, res) => {
         });
 
         req.body = { email, password }
-        // return res.status(200).json({
-        //     success: true,
-        //     buyer
-        // })
+
         await loginBuyer(req, res);
     }
     catch (error) {
@@ -243,6 +240,7 @@ export const activateBuyer = async (req, res) => {
 export const loginBuyer = async (req, res) => {
     try {
         const { email, password } = req.body;
+        console.log("here")
 
         if (!email || !password) {
             return res.status(200).json({
@@ -272,16 +270,19 @@ export const loginBuyer = async (req, res) => {
 
         // console.log(accessToken, refreshToken)
 
-        res.cookie("accessToken", accessToken, accessTokenOptions)
-        res.cookie("refreshToken", refreshToken, refreshTokenOptions)
+        // res.cookie("accessToken", accessToken, accessTokenOptions)
+        // res.cookie("refreshToken", refreshToken, refreshTokenOptions)
 
-        return res.status(200).json({
-                user: loggedInBuyer,
-                accessToken,
-                refreshToken,
-                message: "User logged In Successfully",
-                success: true,
-            })
+        return res.status(200)
+        .cookie("accessToken", accessToken, accessTokenOptions)
+        .cookie("refreshToken", refreshToken, refreshTokenOptions)
+        .json({
+            user: loggedInBuyer,
+            accessToken,
+            refreshToken,
+            message: "User logged In Successfully",
+            success: true,
+        })
 
     } catch (error) {
         console.log("Error in loginBuyer", error.message);
@@ -312,9 +313,9 @@ export const logoutBuyer = async (req, res) => {
             }
         )
 
-        return res.status(200).clearCookie("accessToken", accessTokenOptions)
-            .clearCookie("refreshToken", refreshTokenOptions)
-            .json({
+        res.cookie("accessToken", "", { maxAge: 0 });
+        res.cookie("refreshToken", "", { maxAge: 0 });
+        return res.status(200).json({
                 success: true,
                 message: "Successfully logged out",
             })
@@ -324,72 +325,19 @@ export const logoutBuyer = async (req, res) => {
     }
 }
 
-// export const refreshAccessToken = async (req, res) => {
-//     const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken
-
-
-//     if (!incomingRefreshToken) {
-//         return res.status(200).json({
-//             success: false,
-//             error: "unauthorized request"
-//         })
-//     }
-
-//     try {
-
-//         const decodedToken = jwt.verify(
-//             incomingRefreshToken,
-//             process.env.REFRESH_TOKEN_SECRET
-//         )
-
-//         const buyer = await Buyer.findById(decodedToken?._id)
-
-//         if (!buyer) {
-//             return res.status(200).json({
-//                 success: false,
-//                 error: "Invalid refresh token"
-//             })
-//         }
-
-//         if (incomingRefreshToken !== buyer?.refreshToken) {
-//             return res.status(200).json({
-//                 success: false,
-//                 error: "Invalid Refresh token"
-//             })
-//         }
-
-//         const { accessToken, newRefreshToken } = await generateAccessAndRefreshTokens(buyer._id)
-
-//         return res
-//             .status(200)
-//             .cookie("accessToken", accessToken, options)
-//             .cookie("refreshToken", newRefreshToken, options)
-//             .json({
-//                 accessToken,
-//                 refreshToken: newRefreshToken,
-//                 "message": "Access token refreshed"
-//             })
-//     } catch (error) {
-//         res.status(500).json({
-//             success: false,
-//             error:
-//         })
-//     }
-// }
-
-export const getBuyer = async (req,res) =>{
+export const getBuyer = async (req, res) => {
     try {
         const { user } = req;
 
         res.status(200).json({
             user,
-            success:true,
+            success: true,
         })
-        
+
     } catch (error) {
-        console.log("Error in getBuyer controller: " + error );
+        console.log("Error in getBuyer controller: " + error);
         res.status(500).json({
-            success:false,
+            success: false,
             error: "Internal Server Error",
         })
     }

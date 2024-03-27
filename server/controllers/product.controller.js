@@ -16,64 +16,65 @@ export const getCategorisedProducts = async (req, res) => {
             {
                 category: "Clothes",
                 subcategories: [
-                    { name: "Shirt", keywords: ["shirt", "t-shirt", "tshirt", "top", "blouse", "tee"] },
-                    { name: "Shorts_Jeans", keywords: ["shorts", "jeans", "pants", "trousers", "denim", "bottoms"] },
-                    { name: "Jackets", keywords: ["jacket", "sweaters", "coat", "hoodie", "blazer", "outerwear"] },
-                    { name: "Dress_Frock", keywords: ["dress", "frock", "gown", "skirt", "maxi dress"] }
+                    { name: "Shirt", keywords: ["shirt", "t-shirt", "tshirt", "top", "blouse", "tee", "polo", "tank top", "crop top"] },
+                    { name: "Shorts_Jeans", keywords: ["shorts", "jeans", "pants", "trousers", "denim", "bottoms", "capris", "leggings", "cargo pants"] },
+                    { name: "Jackets", keywords: ["jacket", "sweaters", "coat", "hoodie", "blazer", "outerwear", "windbreaker", "raincoat", "parka"] },
+                    { name: "Dress_Frock", keywords: ["dress", "frock", "gown", "skirt", "maxi dress", "midi dress", "party dress", "cocktail dress", "summer dress"] }
                 ]
             },
             {
                 category: "Bags",
                 subcategories: [
-                    { name: "Shopping_Bag", keywords: ["shopping bag", "tote bag", "carryall", "reusable bag"] },
-                    { name: "Gym_Backpack", keywords: ["gym", "backpack", "gym backpack", "sports bag", "duffel bag"] },
-                    { name: "Purse", keywords: ["purse", "handbag", "clutch", "crossbody bag", "shoulder bag"] },
-                    { name: "Wallet", keywords: ["wallet", "billfold", "cardholder", "money clip", "coin purse"] }
+                    { name: "Shopping_Bag", keywords: ["shopping bag", "tote bag", "carryall", "reusable bag", "grocery bag", "canvas bag", "beach bag"] },
+                    { name: "Gym_Backpack", keywords: ["gym", "backpack", "gym backpack", "sports bag", "duffel bag", "hydration pack", "backpack with laptop compartment"] },
+                    { name: "Purse", keywords: ["purse", "handbag", "clutch", "crossbody bag", "shoulder bag", "satchel", "hobo bag", "bucket bag"] },
+                    { name: "Wallet", keywords: ["wallet", "billfold", "cardholder", "money clip", "coin purse", "passport holder", "travel wallet", "zip-around wallet"] }
                 ]
             },
             {
                 category: "Jewelry",
                 subcategories: [
-                    { name: "Earrings", keywords: ["earrings", "studs", "hoops", "dangles", "ear cuffs"] },
-                    { name: "Couple_Rings", keywords: ["couple rings", "wedding rings", "promise rings", "engagement rings"] },
-                    { name: "Necklace", keywords: ["necklace", "pendant", "choker", "chain", "statement necklace"] }
+                    { name: "Earrings", keywords: ["earrings", "studs", "hoops", "dangles", "ear cuffs", "earrings set", "chandelier earrings", "threader earrings"] },
+                    { name: "Couple_Rings", keywords: ["couple rings", "wedding rings", "promise rings", "engagement rings", "eternity rings", "matching rings", "birthstone rings"] },
+                    { name: "Necklace", keywords: ["necklace", "pendant", "choker", "chain", "statement necklace", "collar necklace", "locket necklace", "layered necklace"] }
                 ]
             },
             {
                 category: "Footwears",
                 subcategories: [
-                    { name: "Sports", keywords: ["sports shoes", "sneakers", "athletic footwear", "running shoes"] },
-                    { name: "Formal", keywords: ["formal shoes", "dress shoes", "oxfords", "loafers", "derby shoes"] },
-                    { name: "Casual", keywords: ["casual shoes", "loafers", "slip-ons", "sneaker boots", "moccasins"] },
-                    { name: "Safety_Shoes", keywords: ["safety shoes", "work boots", "steel-toe boots", "industrial footwear"] }
+                    { name: "Sports", keywords: ["sports shoes", "sneakers", "athletic footwear", "running shoes", "basketball shoes", "soccer cleats", "training shoes", "tennis shoes"] },
+                    { name: "Formal", keywords: ["formal shoes", "dress shoes", "oxfords", "loafers", "derby shoes", "monk strap shoes", "wingtip shoes", "brogues"] },
+                    { name: "Casual", keywords: ["casual shoes", "loafers", "slip-ons", "sneaker boots", "moccasins", "boat shoes", "espadrilles", "slides"] },
+                    { name: "Safety_Shoes", keywords: ["safety shoes", "work boots", "steel-toe boots", "industrial footwear", "electric hazard boots", "slip-resistant shoes", "waterproof work boots"] }
                 ]
             },
             {
                 category: "Cosmetics",
                 subcategories: [
-                    { name: "Shampoo", keywords: ["shampoo", "cleanser", "hair wash", "hair care", "scalp treatment"] },
-                    { name: "Sunscreen", keywords: ["sunscreen", "sunblock", "UV protection", "sun care", "sunscreen lotion"] },
-                    { name: "Body_Wash", keywords: ["body wash", "shower gel", "cleansing gel", "body cleanser", "shower cream"] },
-                    { name: "Makeup_Kit", keywords: ["makeup kit", "cosmetics set", "beauty essentials", "makeup palette", "makeup collection"] }
+                    { name: "Shampoo", keywords: ["shampoo", "cleanser", "hair wash", "hair care", "scalp treatment", "conditioner", "hair mask", "dry shampoo"] },
+                    { name: "Sunscreen", keywords: ["sunscreen", "sunblock", "UV protection", "sun care", "sunscreen lotion", "SPF moisturizer", "sunscreen stick", "facial sunscreen"] },
+                    { name: "Body_Wash", keywords: ["body wash", "shower gel", "cleansing gel", "body cleanser", "shower cream", "bar soap", "body scrub", "body oil"] },
+                    { name: "Makeup_Kit", keywords: ["makeup kit", "cosmetics set", "beauty essentials", "makeup palette", "makeup collection", "makeup brushes", "makeup remover", "makeup organizer"] }
                 ]
             },
             {
                 category: "Glasses",
                 subcategories: [
-                    { name: "Sunglasses", keywords: ["sunglasses", "shades", "sunnies", "UV sunglasses", "polarized sunglasses"] },
-                    { name: "Lenses", keywords: ["lenses", "contact lenses", "eyeglass lenses", "prescription lenses", "vision correction"] },
-                    { name: "Body_Wash", keywords: ["body wash", "cleansing lotion", "facial cleanser", "skincare", "face wash"] },
-                    { name: "Makeup_Kit", keywords: ["makeup kit", "cosmetics set", "beauty essentials", "makeup palette", "makeup collection"] }
+                    { name: "Sunglasses", keywords: ["sunglasses", "shades", "sunnies", "UV sunglasses", "polarized sunglasses", "aviator sunglasses", "cat-eye sunglasses", "oversized sunglasses"] },
+                    { name: "Lenses", keywords: ["lenses", "contact lenses", "eyeglass lenses", "prescription lenses", "vision correction", "bifocal lenses", "color contact lenses", "toric lenses"] },
+                    { name: "Body_Wash", keywords: ["body wash", "cleansing lotion", "facial cleanser", "skincare", "face wash", "makeup remover", "micellar water", "face toner"] },
+                    { name: "Makeup_Kit", keywords: ["makeup kit", "cosmetics set", "beauty essentials", "makeup palette", "makeup collection", "eyeglass cleaner", "lens cleaning kit", "glasses case"] }
                 ]
             },
             {
                 category: "Perfume",
                 subcategories: [
-                    { name: "Cloths_Perfumes", keywords: ["cloths perfumes", "fabric fragrances", "scented clothes", "laundry fragrance"] },
-                    { name: "Deodorant", keywords: ["deodorant", "antiperspirant", "body spray", "roll-on deodorant", "spray deodorant"] }
+                    { name: "Cloths_Perfumes", keywords: ["cloths perfumes", "fabric fragrances", "scented clothes", "laundry fragrance", "linen spray", "fabric softener", "scent booster"] },
+                    { name: "Deodorant", keywords: ["deodorant", "antiperspirant", "body spray", "roll-on deodorant", "spray deodorant", "natural deodorant", "clinical strength deodorant", "deodorant wipes"] }
                 ]
             }
         ];
+
 
         // Initialize an object to store products for each category
         const categorizedProducts = {};
@@ -127,9 +128,61 @@ export const newArrivalProducts = async (req, res) => {
             })
         }
 
-        const clothes = await Products.find().sort({ createdAt: -1 }).limit(8);
-        const footwears = await Products.find().sort({ createdAt: -1 }).skip(8).limit(8);
-        const accessories = await Products.find().sort({ createdAt: -1 }).skip(16).limit(8);
+        const clothKeyWordsList = [
+            "shirt", "t-shirt", "tshirt", "top", "blouse", "tee", "polo", "tank top", "crop top",
+            "shorts", "jeans", "pants", "trousers", "denim", "bottoms", "capris", "leggings", "cargo pants",
+            "jacket", "sweaters", "coat", "hoodie", "blazer", "outerwear", "windbreaker", "raincoat", "parka",
+            "dress", "frock", "gown", "skirt", "maxi dress", "midi dress", "party dress", "cocktail dress", "summer dress"
+        ]
+
+        const footwearKeyWordsList = [
+            "sports shoes", "sneakers", "athletic footwear", "running shoes", "basketball shoes", "soccer cleats", "training shoes", "tennis shoes",
+            "formal shoes", "dress shoes", "oxfords", "loafers", "derby shoes", "monk strap shoes", "wingtip shoes", "brogues",
+            "casual shoes", "loafers", "slip-ons", "sneaker boots", "moccasins", "boat shoes", "espadrilles", "slides",
+            "safety shoes", "work boots", "steel-toe boots", "industrial footwear", "electric hazard boots", "slip-resistant shoes", "waterproof work boots"
+        ]
+
+        const accessoriesKeyWordsList = [
+            "deodorant", "antiperspirant", "shades", "sunnies", "earrings", "studs", "phone",  "body spray", "roll-on deodorant", "spray deodorant", "natural deodorant", "clinical strength deodorant", "deodorant wipes",
+            "wallet", "billfold", "cardholder", "money clip", "coin purse", "passport holder", "travel wallet", "zip-around wallet",
+            "hoops", "dangles", "ear cuffs", "chandelier earrings", "threader earrings", "ipad", "laptop", "computer" ,
+            "sunglasses", "UV sunglasses", "polarized sunglasses", "aviator sunglasses", "cat-eye sunglasses", "oversized sunglasses"
+        ]
+
+        const clothes = await Products.find({
+            $or: [
+                { productName: { $regex: clothKeyWordsList.join("|"), $options: 'i' } },
+                {
+                    $or: clothKeyWordsList.map(keyword => ({
+                        tags: { $regex: new RegExp(keyword.split(" ").join("|"), "i") }
+                    }))
+                }
+            ]
+        }).limit(8);
+
+        const footwears = await Products.find({
+            $or: [
+                { productName: { $regex: footwearKeyWordsList.join("|"), $options: 'i' } },
+                {
+                    $or: footwearKeyWordsList.map(keyword => ({
+                        tags: { $regex: new RegExp(keyword.split(" ").join("|"), "i") }
+                    }))
+                }
+            ]
+        }).limit(8);
+
+        const accessories = await Products.find({
+            $or: [
+                { productName: { $regex: accessoriesKeyWordsList.join("|"), $options: 'i' } },
+                {
+                    $or: accessoriesKeyWordsList.map(keyword => ({
+                        tags: { $regex: new RegExp(keyword.split(" ").join("|"), "i") }
+                    }))
+                }
+            ]
+        }).limit(8);
+
+
 
         redis.set("clothes", JSON.stringify(clothes), 'EX', 1800)
         redis.set("footwears", JSON.stringify(footwears), 'EX', 1800)
@@ -155,19 +208,22 @@ export const dealOfDay = async (req, res) => {
     try {
 
         const cacheDealOfDay = await redis.get("dealOfDay");
+        const dealOfDayTTL = await redis.ttl("dealOfDay");
         if (cacheDealOfDay) {
             return res.status(200).json({
                 success: true,
-                products: JSON.parse(cacheDealOfDay)
+                products: JSON.parse(cacheDealOfDay),
+                timeLeft: dealOfDayTTL
             });
         }
 
         const randomProducts = await Products.aggregate([{ $sample: { size: 2 } }]);
-        await redis.set("dealOfDay", JSON.stringify(randomProducts), 'EX', 86400 );
-    
+        await redis.set("dealOfDay", JSON.stringify(randomProducts), 'EX', 86398);
+
         res.status(200).json({
             success: true,
-            products: randomProducts
+            products: randomProducts,
+            timeLeft: 86399
         });
 
     } catch (e) {
@@ -183,7 +239,7 @@ export const featuredProducts = async (req, res) => {
     try {
 
         const cachedProducts = await redis.get("featuredProducts")
-        if(cachedProducts) {
+        if (cachedProducts) {
             return res.status(200).json({
                 success: true,
                 products: JSON.parse(cachedProducts)
@@ -211,7 +267,7 @@ export const getCategories = async (req, res) => {
     try {
 
         const cachedProducts = await redis.get("categories");
-        if(cachedProducts){
+        if (cachedProducts) {
             return res.status(200).json({
                 success: true,
                 result: JSON.parse(cachedProducts)
@@ -259,7 +315,7 @@ export const getProductById = async (req, res) => {
         const id = req.params.id;
 
         const cachedProducts = await redis.get(id);
-        if(cachedProducts){
+        if (cachedProducts) {
             return res.status(200).json({
                 success: true,
                 product: JSON.parse(cachedProducts)
@@ -267,7 +323,7 @@ export const getProductById = async (req, res) => {
         }
 
         const product = await Products.findById(id);
-        
+
         if (product) {
             await redis.set(id, JSON.stringify(product), 'EX', 900)
             res.status(200).json({
@@ -335,8 +391,8 @@ export const getProductBySearch = async (req, res) => {
             });
         } else {
             res.status(200).json({
-                success: false,
-                error: "No products found"
+                success: true,
+                products: []
             });
         }
     } catch (error) {

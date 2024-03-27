@@ -12,6 +12,7 @@ import YourCategories from './pages/YourCategories';
 import CreateProduct from './pages/CreateProduct';
 import CategoriesProduct from './pages/CategoriesProduct';
 import EditProduct from './pages/EditProduct';
+import Chat from './pages/Chat';
 
 function App() {
   const { findStatus } = useIsLoggedIn();
@@ -40,40 +41,61 @@ function App() {
   return (
     <div className={`h-screen bg-white`}>
       <Routes>
+
+        {/* Go to landing page */}
         <Route path='/' element={
           isLoggedIn
             ? <Navigate to={'/profile'} />
             : <LandingPage />
         } />
+
+        {/* Go to profile Page */}
         <Route path='/profile' element={
           isLoggedIn
             ? <ProfilePage />
             : <Navigate to={'/'} />
         } />
+
+        {/* Go to Edit Profile */}
         <Route path='/editProfile' element={
           isLoggedIn
             ? <EditProfile/>
             : <Navigate to={'/'} />
         } />
+
+        {/* Go to Your Categories */}
         <Route path='/yourCategories' element={
           isLoggedIn
             ? <YourCategories/>
             : <Navigate to={'/'} />
         } />
+
+        {/* Go to add product */}
         <Route path='/addProduct' element={
           isLoggedIn
             ? <CreateProduct/>
             : <Navigate to={'/'} />
         } />
+
+        {/* Go to particular category */}
         <Route path='/category/:category' element={
           isLoggedIn
             ? <CategoriesProduct/>
             : <Navigate to={'/'} />
         } />
+
+        {/* Go to edit product */}
         <Route path='/editProduct/:category/:id' element={
           isLoggedIn
             ? <EditProduct/>
             : <Navigate to={'/'} />
+        } />
+
+        {/* Go to Chat */}
+        <Route path='/chat' element={
+          isLoggedIn
+          ? <Chat/>
+          : <Navigate to={'/'} />
         } />
       </Routes>
     </div>

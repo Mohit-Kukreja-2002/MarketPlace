@@ -1,6 +1,7 @@
 import Products from "../models/products.js";
 import Seller from "../models/seller.js";
 import dotenv from 'dotenv';
+import { redis } from "../utils/redis.js";
 dotenv.config();
 
 export const getSellerInfo = async (req, res) => {
@@ -58,12 +59,13 @@ export const updateSellerInfo = async (req, res) => {
 
 export const addProduct = async (req, res) => {
     try {
-        const data = req.body;
+        const {data} = req.body;
 
         const sellerId = req.seller?._id;
         const seller = await Seller.findById(sellerId);
         
-        data.creator = sellerId
+        // console.log(data)
+        data.creator = seller._id
 
         try {
             const product = await Products.create(data);
@@ -71,13 +73,24 @@ export const addProduct = async (req, res) => {
             await seller.save();
             // console.log(product)
 
+            // Delete cached data in Redis
+            await Promise.all([
+                redis.del("categorised_products"),
+                redis.del("clothes"),
+                redis.del("footwears"),
+                redis.del("accessories"),
+                redis.del("featuredProducts"),
+                redis.del("categories"),
+            ]);
+            
+
             res.status(200).json({
                 success: true,
                 message: "Product added successfully",
                 product,
             });
         } catch (error) {
-            console.log(error.message);
+            console.log("Error adding product: ",error);
             res.status(400).send({
                 success: false,
                 error: error.message
@@ -257,7 +270,7 @@ export const getSellerInfoById = async (req, res) => {
 
         // If seller not found, return an error response
         if (!seller) {
-            console.log("inside")
+            // console.log("inside")
             return res.status(200).json({ success: false, error: "Seller not found" });
         }
 

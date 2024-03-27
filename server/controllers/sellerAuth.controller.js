@@ -58,7 +58,10 @@ export const registerSeller = async (req, res) => {
             });
         } catch (error) {
             console.log(error.message)
-            return res.status(400).json({ error: "Error sending email" });
+            return res.status(400).json({ 
+                success: false,
+                error: "Error sending email" 
+            });
         }
 
     } catch (error) {

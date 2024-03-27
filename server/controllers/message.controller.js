@@ -2,6 +2,8 @@ import Seller from "../models/seller.js";
 import Message from "../models/message.js";
 import Conversation from "../models/conversationModel.js";
 import Buyer from "../models/buyer.js";
+import { getReceiverSocketId } from "../socket/socket.js";
+import { io } from "../socket/socket.js"
 
 export const sendMessageBuyer = async (req, res) => {
     try {
@@ -39,11 +41,11 @@ export const sendMessageBuyer = async (req, res) => {
         // run in parallel
         await Promise.all([conversation.save(), newMessage.save()]);
 
-        // const receiverSocketId = getReceiverSocketId(receiverId);
-        // if (receiverSocketId) {
-        //     // io.to(<socket_id>).emit() used to send events to specific client
-        //     io.to(receiverSocketId).emit("newMessage", newMessage);
-        // }
+        const receiverSocketId = getReceiverSocketId(sellerId);
+        if (receiverSocketId) {
+            // io.to(<socket_id>).emit() used to send events to specific client
+            io.to(receiverSocketId).emit("newMessage", newMessage);
+        }
 
         res.status(200).json({
             success: true,
@@ -95,11 +97,11 @@ export const sendMessageSeller = async (req, res) => {
         // run in parallel
         await Promise.all([conversation.save(), newMessage.save()]);
 
-        // const receiverSocketId = getReceiverSocketId(receiverId);
-        // if (receiverSocketId) {
-        //     // io.to(<socket_id>).emit() used to send events to specific client
-        //     io.to(receiverSocketId).emit("newMessage", newMessage);
-        // }
+        const receiverSocketId = getReceiverSocketId(buyerId);
+        if (receiverSocketId) {
+            // io.to(<socket_id>).emit() used to send events to specific client
+            io.to(receiverSocketId).emit("newMessage", newMessage);
+        }
 
         res.status(200).json({
             success: true,
@@ -215,16 +217,26 @@ export const getChattedSellers = async (req, res) => {
 
         let buyer = req.user;
         buyer = await buyer.populate('conversationList')
+        buyer.conversationList.sort((a, b) => b.updatedAt - a.updatedAt);
 
         // Fetch last message from Message Model
-        const lastMessageIds = buyer.conversationList.map(conversation => conversation.messages[conversation.messages.length - 1])
-        const messages = await Message.find({ _id: { $in: lastMessageIds } }).select("message");
-
+        let lastMessageIds = buyer.conversationList.map(conversation => conversation.messages[conversation.messages.length - 1])
         // Extract seller IDs from each conversation
         const sellerIds = buyer.conversationList.map(conversation => conversation.participants[1]);
 
+        
+        let messages = []
+        for( let i = 0; i < lastMessageIds.length; i++){
+            const message = await Message.findById(lastMessageIds[i]).select("message");
+            messages.push(message);
+        }
+
         // Fetch seller documents using these IDs
-        const sellers = await Seller.find({ _id: { $in: sellerIds } }).select("shopName upi avatar");
+        let sellers = []
+        for( let i = 0; i < lastMessageIds.length; i++){
+            const seller = await Seller.findById(sellerIds[i]).select("shopName upi avatar");
+            sellers.push(seller);
+        }
 
         // Return the list of sellers
         res.status(200).json({
@@ -244,22 +256,39 @@ export const getChattedSellers = async (req, res) => {
 
 export const getChattedBuyers = async (req, res) => {
     try {
-        // Get the logged-in buyer's ID from the request
-        // const buyerId = req.user;
 
         let seller = req.seller;
         seller = await seller.populate('conversationList')
+        seller.conversationList.sort((a, b) => b.updatedAt - a.updatedAt);
+        // console.log(seller)
 
+        // Fetch last message from Message Model
+        let lastMessageIds = seller.conversationList.map(conversation => conversation.messages[conversation.messages.length - 1])
         // Extract buyer IDs from each conversation
-        const buyerIds = seller.conversationList.map(conversation => conversation.participants[0]);
+        let buyerIds = seller.conversationList.map(conversation => conversation.participants[0]);
 
-        // Fetch seller documents using these IDs
-        const buyers = await Buyer.find({ _id: { $in: buyerIds } }).select("name avatar");
+
+        // Get corresponding messages
+        let messages = [];
+        for( let i = 0; i < lastMessageIds.length; i++){
+            const message = await Message.findById(lastMessageIds[i]).select("message");
+            messages.push(message);
+        }
+
+        // Fetch buyer documents using these IDs
+        let buyers = [];
+        for( let i = 0; i < lastMessageIds.length; i++){
+            const buyer = await Buyer.findById(buyerIds[i]).select("name avatar");
+            buyers.push(buyer);
+        }
+
+        // console.log(messages, buyers)
 
         // Return the list of sellers
         res.status(200).json({
             success: true,
-            buyers
+            buyers,
+            messages
         });
     } catch (error) {
         console.log('Error in getChattedSellers:', error);

@@ -65,7 +65,6 @@ BuyerSchema.methods.comparePassword =  function (password) {
 }
 
 BuyerSchema.methods.generateAccessToken = function () {
-    console.log("access")
     return jwt.sign(
         {
             _id: this._id,

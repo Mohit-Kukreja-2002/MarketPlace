@@ -50,7 +50,7 @@ const Products = () => {
                     categoryProducts.map((product) => (
                         <div key={product._id} className="relative flex flex-col max-w-xs mx-1 overflow-hidden bg-white sm:mx-2 group">
                             <div className="relative flex overflow-hidden h-72 w-60" >
-                                <img className="absolute top-0 right-0 object-cover w-full h-full" src={product.image?.url || categoryImageMap[selectedCategory]} alt="product image" />
+                                <img className="absolute top-0 right-0 object-cover w-full h-full" src={product.image[0]?.url || categoryImageMap[selectedCategory]} alt="product image" />
                                 <DropdownMenu category={selectedCategory} id={product._id} />
                             </div>
                             <div className="pb-1 mt-2">
